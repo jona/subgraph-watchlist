@@ -88,7 +88,7 @@ function render(subgraphs) {
               subgraph.currentVersion.subgraphDeployment.signalledTokens *
                 10 ** -18,
             ).format('0,0')}{' '}
-            1<span className={styles.subtext}>GRT</span>
+            <span className={styles.subtext}>GRT</span>
           </div>
           <div className={styles.property}>
             <strong>Price per share</strong>:{' '}
