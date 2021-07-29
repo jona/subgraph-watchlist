@@ -1,6 +1,6 @@
 import { query } from '../lib/graphQL/subgraph/list'
 
-export const subgraphList = {
+export const subgraphListQuery = {
   operationName: 'subgraphs',
   variables: {
     orderBy: 'currentSignalledTokens',

@@ -1,13 +1,13 @@
 import { query } from '../lib/graphQL/subgraph/single'
 import { watchList } from '../watchList'
 
-export const subgraphs = watchList.map(id => {
+export const subgraphWatchQuery = watchList.map(id => {
   return {
     operationName: 'subgraph',
     variables: {
       id: id,
-      firstSignals: 1000,
-      nameSignalsOrderBy: 'averageCostBasis',
+      firstSignals: 5,
+      nameSignalsOrderBy: 'signalledTokens',
       nameSignalsOrderDirection: 'desc',
     },
     query: query,
