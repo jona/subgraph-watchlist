@@ -7,14 +7,16 @@ import moment from 'moment'
 import { Api } from '../lib/api'
 import { subgraphWatchQuery } from '../lib/subgraphWatchQuery'
 import { subgraphListQuery } from '../lib/subgraphListQuery'
+import { subgraphTransactionsQuery } from '../lib/subgraphTransactionsQuery'
 
 import { useInterval } from '../hooks/useInterval'
 
-export default function Home({ subgraphs, subgraphList }) {
+export default function Home({ subgraphs, subgraphList, transactions }) {
   const [data, setData] = useState({
     lastUpdated: Date.now(),
     subgraphs,
     subgraphList,
+    transactions,
   })
 
   useInterval(async () => {
@@ -25,14 +27,22 @@ export default function Home({ subgraphs, subgraphList }) {
       }),
     )
 
+    const transactions = await Promise.all(
+      subgraphTransactionsQuery.map(async transaction => {
+        const response = await Api().post('', transaction)
+        return response.data.data
+      }),
+    )
+
     const response = await Api().post('', subgraphListQuery)
 
     setData({
       lastUpdated: Date.now(),
       subgraphs: responses,
       subgraphList: response.data.data.subgraphs,
+      transactions: transactions,
     })
-  }, 40000)
+  }, 20000)
 
   return (
     <div className={styles.container}>
@@ -51,8 +61,8 @@ export default function Home({ subgraphs, subgraphList }) {
           <div className={styles.leftGrid}>{render(data.subgraphs)}</div>
           <div className={styles.rightGrid}>
             <div className={styles.card}>
-              <h2>Top Signaled Subgraphs</h2>
-              {renderList(data.subgraphList)}
+              <h2 className={styles.signalChangesHeader}>Signal Changes</h2>
+              {renderChanges(data.transactions)}
             </div>
           </div>
         </div>
@@ -61,12 +71,76 @@ export default function Home({ subgraphs, subgraphList }) {
   )
 }
 
+function renderChanges(nameTransactions) {
+  let sorted = []
+
+  nameTransactions.map(transactions => {
+    transactions.nameSignalTransactions.map(transaction => {
+      sorted.push(transaction)
+    })
+  })
+
+  sorted = sorted.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1)).reverse()
+
+  return sorted.map(transaction => {
+    return (
+      <div key={transaction.id} className={styles.transaction}>
+        <div className={styles.transactionType}>{transaction.type}</div>
+        <div>
+          {formatGrt(transaction.tokens, '0,0.0000')}{' '}
+          <span className={styles.subtext}>GRT</span>
+        </div>
+        <div className={styles.transactionSubgraph}>
+          {transaction.subgraph.displayName}
+        </div>
+      </div>
+    )
+  })
+}
+
 function render(subgraphs) {
   return subgraphs.map(subgraph => {
     return (
       <div key={subgraphs.id} className={styles.card}>
-        <h2>{subgraph.displayName}</h2>
-        <div className={styles.subtitle}>
+        <div className={styles.cardHeader}>
+          <h2>{subgraph.displayName}</h2>
+          <div className={styles.headerSignal}>
+            {formatGrt(subgraph.currentSignalledTokens)}
+          </div>
+        </div>
+        <div className={styles.cardProperties}>
+          <div className={styles.property}>
+            <div>
+              <strong>Signal Value</strong>
+            </div>
+            <div>
+              {formatGrt(
+                subgraph.currentVersion.subgraphDeployment.signalledTokens,
+              )}
+            </div>
+          </div>
+          <div className={styles.property}>
+            <div>
+              <strong>Price per share</strong>
+            </div>
+            <div>
+              {numeral(
+                subgraph.currentVersion.subgraphDeployment.pricePerShare,
+              ).format('0,0')}
+            </div>
+          </div>
+          <div className={styles.property}>
+            <div>
+              <strong>Curators</strong>
+            </div>
+            <div>{subgraph.nameSignalCount}</div>
+          </div>
+        </div>
+        {/* <div className={styles.curatorsContainer}>
+          <h3>Top 5 curators</h3>
+          {curators(subgraph)}
+        </div> */}
+        <div className={styles.cardFooter}>
           <strong>ID</strong>:{' '}
           <a
             href={`https://thegraph.com/explorer/subgraph?id=${subgraph.id}&view=Overview`}
@@ -75,44 +149,13 @@ function render(subgraphs) {
           >
             {subgraph.id}
           </a>
-        </div>
-        <div className={styles.cardProperties}>
-          <div className={styles.property}>
-            <strong>Signal</strong>:{' '}
-            {numeral(subgraph.currentSignalledTokens * 10 ** -18).format('0,0')}{' '}
-            <span className={styles.subtext}>GRT</span>
-          </div>
-          <div className={styles.property}>
-            <strong>Signal Value</strong>:{' '}
-            {numeral(
-              subgraph.currentVersion.subgraphDeployment.signalledTokens *
-                10 ** -18,
-            ).format('0,0')}{' '}
-            <span className={styles.subtext}>GRT</span>
-          </div>
-          <div className={styles.property}>
-            <strong>Price per share</strong>:{' '}
-            {numeral(
-              subgraph.currentVersion.subgraphDeployment.pricePerShare,
-            ).format('0,0')}{' '}
-            <span className={styles.subtext}>GRT</span>
-          </div>
-          <div className={styles.property}>
-            <strong>Curators</strong>: {subgraph.nameSignalCount}
-          </div>
-        </div>
-        <div className={styles.curatorsContainer}>
-          <h3>Top 5 curators</h3>
-          {curators(subgraph)}
-        </div>
-        <div className={styles.cardFooter}>
-          <h3>Owner</h3>
+          {/* <h3>Owner</h3>
           <div className={styles.subtitle}>
             <strong>ID</strong>: {subgraph.owner.id}
           </div>
           <a
             className={styles.footerLink}
-            href={`https://thegraph.com/explorer/profile?id="${subgraph.owner.id}"&view=Overview`}
+            href={`https://thegraph.com/explorer/profile?id=${subgraph.owner.id}&view=Overview`}
             target="_blank"
             rel="noreferrer"
           >
@@ -126,7 +169,7 @@ function render(subgraphs) {
             rel="noreferrer"
           >
             Go to Etherscan.io
-          </a>
+          </a> */}
         </div>
       </div>
     )
@@ -137,12 +180,12 @@ function curators(subgraph) {
   return subgraph.nameSignals.map(nameSignal => {
     return (
       <div className={styles.curator} key={nameSignal.id}>
-        {numeral(nameSignal.signalledTokens * 10 ** -18).format('0,0')}{' '}
-        <span className={styles.subtext}>GRT</span>
+        Original: {formatGrt(nameSignal.signalledTokens)} - Current:{' '}
+        {formatGrt(nameSignal.signalledTokens - nameSignal.unsignalledTokens)}
         <div>
           <a
             className={styles.footerLink}
-            href={`https://thegraph.com/explorer/profile?id="${nameSignal.curator.id}"&view=Overview`}
+            href={`https://thegraph.com/explorer/profile?id=${nameSignal.curator.id}&view=Overview`}
             target="_blank"
             rel="noreferrer"
           >
@@ -175,8 +218,7 @@ function renderList(subgraphList) {
           {subgraph.displayName}
         </a>
         <div className={styles.subgraphListItemSubtitle}>
-          {numeral(subgraph.currentSignalledTokens * 10 ** -18).format('0,0')}{' '}
-          <span className={styles.subtext}>GRT</span>
+          {formatGrt(subgraph.currentSignalledTokens)}
         </div>
       </div>
     )
@@ -187,11 +229,27 @@ function formatDate(date) {
   return moment(date).format('MMMM Do YYYY, h:mm:ss a')
 }
 
+function formatGrt(grt, format = '0,0') {
+  return (
+    <span>
+      {numeral(grt * 10 ** -18).format(format)}{' '}
+      <span className={styles.subtext}>GRT</span>
+    </span>
+  )
+}
+
 export async function getStaticProps() {
-  const responses = await Promise.all(
+  const subgraphs = await Promise.all(
     subgraphWatchQuery.map(async subgraph => {
       const response = await Api().post('', subgraph)
       return response.data.data.subgraph
+    }),
+  )
+
+  const transactions = await Promise.all(
+    subgraphTransactionsQuery.map(async transaction => {
+      const response = await Api().post('', transaction)
+      return response.data.data
     }),
   )
 
@@ -199,8 +257,9 @@ export async function getStaticProps() {
 
   return {
     props: {
-      subgraphs: responses,
+      subgraphs: subgraphs,
       subgraphList: response.data.data.subgraphs,
+      transactions: transactions,
     },
   }
 }
