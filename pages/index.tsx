@@ -87,8 +87,14 @@ function renderChanges(nameTransactions) {
       <div key={transaction.id} className={styles.transaction}>
         <div className={styles.transactionType}>{transaction.type}</div>
         <div>
-          {formatGrt(transaction.tokens, '0,0.0000')}{' '}
-          <span className={styles.subtext}>GRT</span>
+          <a
+            className={styles.footerLink}
+            href={`https://etherscan.io/address/${transaction.signer.id}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {formatGrt(transaction.tokens, '0,0.0000')}
+          </a>{' '}
         </div>
         <div className={styles.transactionSubgraph}>
           {transaction.subgraph.displayName}
