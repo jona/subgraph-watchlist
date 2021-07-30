@@ -8,6 +8,13 @@
   margin: 0 5%;
 }
 
+.logo {
+  background: #000;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin-right: 10px;
+}
+
 .title {
   display: flex;
   align-items: center;
