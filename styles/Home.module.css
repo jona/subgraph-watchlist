@@ -11,7 +11,7 @@
 .title {
   display: flex;
   align-items: center;
-  margin: 10px 0 25px;
+  margin: 10px 10px 25px;
 }
 
 .title h1 {
