@@ -245,7 +245,9 @@ function renderChanges(nameTransactions) {
   return sorted.map(transaction => {
     return (
       <div key={transaction.id} className={styles.transaction}>
-        <div className={styles.transactionType}>{transaction.type}</div>
+        <div className={styles.transactionHeader}>
+          {signalType(transaction.type)} {transaction.subgraph.displayName}
+        </div>
         <div>
           <a
             className={styles.footerLink}
@@ -256,12 +258,20 @@ function renderChanges(nameTransactions) {
             {formatGrt(transaction.tokens, '0,0.00')}
           </a>{' '}
         </div>
-        <div className={styles.transactionSubgraph}>
-          {transaction.subgraph.displayName}
+        <div className={styles.transactionFooter}>
+          {formatDate(transaction.timestamp * 1000)}
         </div>
       </div>
     )
   })
+}
+
+function signalType(type) {
+  if (type == 'MintNSignal') {
+    return <span className={styles.transactionTypePlus}>+</span>
+  } else {
+    return <span className={styles.transactionTypeMinus}>-</span>
+  }
 }
 
 function curators(subgraph) {

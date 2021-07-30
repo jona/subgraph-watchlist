@@ -77,12 +77,22 @@
   font-size: 14px;
 }
 
-.transactionType {
+.transactionTypePlus {
   font-weight: bold;
+  color: green;
+  font-size: 16px;
 }
 
-.transactionSubgraph {
-  font-size: 12px;
+.transactionTypeMinus {
+  font-weight: bold;
+  color: red;
+  font-size: 16px;
+}
+
+.transactionFooter {
+  font-size: 10px;
+  color: #666;
+  margin-top: 5px;
 }
 
 .cardHeader {
