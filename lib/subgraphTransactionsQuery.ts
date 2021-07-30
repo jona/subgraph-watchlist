@@ -6,7 +6,7 @@ export const subgraphTransactionsQuery = watchList.map(id => {
     operationName: 'transactions',
     variables: {
       id: id,
-      first: 4,
+      first: 50,
       OrderBy: 'timestamp',
       OrderDirection: 'desc',
     },

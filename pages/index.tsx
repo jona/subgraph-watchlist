@@ -3,6 +3,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import numeral from 'numeral'
 import moment from 'moment'
+import { Line } from 'react-chartjs-2'
 
 import { Api } from '../lib/api'
 import { subgraphWatchQuery } from '../lib/subgraphWatchQuery'
@@ -64,7 +65,7 @@ export default function Home({ subgraphs, subgraphList, transactions }) {
         </div>
         <div className={styles.grid}>
           <div className={styles.leftGrid}>
-            {renderSubgraphs(data.subgraphs)}
+            {renderSubgraphs(data.subgraphs, data.transactions)}
           </div>
           <div className={styles.rightGrid}>
             <div className={styles.card}>
@@ -79,40 +80,7 @@ export default function Home({ subgraphs, subgraphList, transactions }) {
   )
 }
 
-function renderChanges(nameTransactions) {
-  let sorted = []
-
-  nameTransactions.map(transactions => {
-    transactions.nameSignalTransactions.map(transaction => {
-      sorted.push(transaction)
-    })
-  })
-
-  sorted = sorted.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1)).reverse()
-
-  return sorted.map(transaction => {
-    return (
-      <div key={transaction.id} className={styles.transaction}>
-        <div className={styles.transactionType}>{transaction.type}</div>
-        <div>
-          <a
-            className={styles.footerLink}
-            href={`https://etherscan.io/address/${transaction.signer.id}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {formatGrt(transaction.tokens, '0,0.00')}
-          </a>{' '}
-        </div>
-        <div className={styles.transactionSubgraph}>
-          {transaction.subgraph.displayName}
-        </div>
-      </div>
-    )
-  })
-}
-
-function renderSubgraphs(subgraphs) {
+function renderSubgraphs(subgraphs, transactions) {
   return subgraphs.map(subgraph => {
     return (
       <div key={subgraphs.id} className={styles.card}>
@@ -154,6 +122,7 @@ function renderSubgraphs(subgraphs) {
           <h3>Top 5 curators</h3>
           {curators(subgraph)}
         </div> */}
+        {renderTransactionChart(subgraph, transactions)}
         <div className={styles.cardFooter}>
           <strong>ID</strong>:{' '}
           <a
@@ -184,6 +153,108 @@ function renderSubgraphs(subgraphs) {
           >
             Go to Etherscan.io
           </a> */}
+        </div>
+      </div>
+    )
+  })
+}
+
+function renderTransactionChart(subgraph, nameTransactions) {
+  let sorted = []
+
+  nameTransactions.map(transactions => {
+    transactions.nameSignalTransactions.map(transaction => {
+      if (transaction.subgraph.id == subgraph.id) sorted.push(transaction)
+    })
+  })
+
+  sorted = sorted.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1)).reverse()
+
+  let signal = parseInt(subgraph.currentSignalledTokens)
+  const values = []
+  let size = sorted.length
+
+  values.push(signal * 10 ** -18)
+
+  sorted.forEach(transaction => {
+    const tokens = parseInt(transaction.tokens)
+
+    if (transaction.type == 'MintNSignal') {
+      signal = signal - tokens
+    } else {
+      signal = signal + tokens
+    }
+    values.push(signal * 10 ** -18)
+  })
+
+  const data = {
+    labels: [...Array(size + 1).keys()],
+    datasets: [
+      {
+        label: 'Signal',
+        data: values.reverse(),
+        fill: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        borderColor: 'rgba(0, 0, 0, 0.75)',
+      },
+    ],
+  }
+
+  const options = {
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      ],
+    },
+  }
+
+  const LineChart = () => (
+    <>
+      <div className={styles.chartContainer}>
+        <h1>Past {size} transactions</h1>
+        <Line
+          data={data}
+          options={options}
+          height="100"
+          className={styles.chart}
+        />
+      </div>
+    </>
+  )
+  return LineChart()
+}
+
+function renderChanges(nameTransactions) {
+  let sorted = []
+
+  nameTransactions.map(transactions => {
+    transactions.nameSignalTransactions.slice(0, 4).map(transaction => {
+      sorted.push(transaction)
+    })
+  })
+
+  sorted = sorted.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1)).reverse()
+
+  return sorted.map(transaction => {
+    return (
+      <div key={transaction.id} className={styles.transaction}>
+        <div className={styles.transactionType}>{transaction.type}</div>
+        <div>
+          <a
+            className={styles.footerLink}
+            href={`https://etherscan.io/address/${transaction.signer.id}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {formatGrt(transaction.tokens, '0,0.00')}
+          </a>{' '}
+        </div>
+        <div className={styles.transactionSubgraph}>
+          {transaction.subgraph.displayName}
         </div>
       </div>
     )
@@ -244,10 +315,13 @@ function formatDate(date) {
 function formatGrt(grt, format = '0,0') {
   return (
     <span>
-      {numeral(grt * 10 ** -18).format(format)}{' '}
-      <span className={styles.subtext}>GRT</span>
+      {convertGrt(grt, format)} <span className={styles.subtext}>GRT</span>
     </span>
   )
+}
+
+function convertGrt(grt, format = '0,0') {
+  return numeral(grt * 10 ** -18).format(format)
 }
 
 export async function getStaticProps() {
