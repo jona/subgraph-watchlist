@@ -9,7 +9,7 @@
 }
 
 .logo {
-  background: #000;
+  background: rgba(111, 76, 255, 0.88);
   border-radius: 5px;
   padding: 10px 15px;
   margin-right: 10px;
@@ -63,6 +63,7 @@
   border-radius: 10px;
   background: #fff;
   font-size: 14px;
+  border-bottom: 2px solid #ccc;
 }
 
 .transaction {
@@ -127,6 +128,7 @@
   padding: 10px 15px;
   border-top: 1px solid #ddd;
   font-size: 12px;
+  color: #666;
 }
 
 .cardFooter h3 {
