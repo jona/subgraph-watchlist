@@ -12,6 +12,8 @@ import { subgraphTransactionsQuery } from '../lib/subgraphTransactionsQuery'
 
 import { useInterval } from '../hooks/useInterval'
 
+const INTERVAL = 10000
+
 export default function Home({ subgraphs, subgraphList, transactions }) {
   const [data, setData] = useState({
     lastUpdated: Date.now(),
@@ -43,7 +45,7 @@ export default function Home({ subgraphs, subgraphList, transactions }) {
       subgraphList: response.data.data.subgraphs,
       transactions: transactions,
     })
-  }, 20000)
+  }, INTERVAL)
 
   return (
     <div className={styles.container}>
@@ -210,6 +212,7 @@ function renderTransactionChart(subgraph, nameTransactions) {
         },
       ],
     },
+    animations: false,
   }
 
   const LineChart = () => (
