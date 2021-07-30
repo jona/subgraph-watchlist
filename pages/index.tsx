@@ -52,13 +52,16 @@ export default function Home({ subgraphs, subgraphList, transactions }) {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>Subgraph Watchlist</h1>
-
-        <div className={styles.lastUpdated}>
-          <strong>Last updated</strong>: {formatDate(data.lastUpdated)}
+        <div className={styles.title}>
+          <h1>Subgraph Watchlist</h1>
+          <div className={styles.lastUpdated}>
+            <strong>Updated</strong>: {formatDate(data.lastUpdated)}
+          </div>
         </div>
         <div className={styles.grid}>
-          <div className={styles.leftGrid}>{render(data.subgraphs)}</div>
+          <div className={styles.leftGrid}>
+            {renderSubgraphs(data.subgraphs)}
+          </div>
           <div className={styles.rightGrid}>
             <div className={styles.card}>
               <h2 className={styles.signalChangesHeader}>Signal Changes</h2>
@@ -67,6 +70,7 @@ export default function Home({ subgraphs, subgraphList, transactions }) {
           </div>
         </div>
       </main>
+      {/* <div className={styles.subgraphList}>{renderList(data.subgraphList)}</div> */}
     </div>
   )
 }
@@ -93,7 +97,7 @@ function renderChanges(nameTransactions) {
             target="_blank"
             rel="noreferrer"
           >
-            {formatGrt(transaction.tokens, '0,0.0000')}
+            {formatGrt(transaction.tokens, '0,0.00')}
           </a>{' '}
         </div>
         <div className={styles.transactionSubgraph}>
@@ -104,7 +108,7 @@ function renderChanges(nameTransactions) {
   })
 }
 
-function render(subgraphs) {
+function renderSubgraphs(subgraphs) {
   return subgraphs.map(subgraph => {
     return (
       <div key={subgraphs.id} className={styles.card}>
@@ -213,7 +217,7 @@ function curators(subgraph) {
 }
 
 function renderList(subgraphList) {
-  return subgraphList.slice(0, 20).map(subgraph => {
+  return subgraphList.slice(0, 10).map(subgraph => {
     return (
       <div className={styles.subgraphListItem} key={subgraph.id}>
         <a
@@ -222,10 +226,8 @@ function renderList(subgraphList) {
           rel="noreferrer"
         >
           {subgraph.displayName}
-        </a>
-        <div className={styles.subgraphListItemSubtitle}>
-          {formatGrt(subgraph.currentSignalledTokens)}
-        </div>
+        </a>{' '}
+        {formatGrt(subgraph.currentSignalledTokens)}
       </div>
     )
   })
