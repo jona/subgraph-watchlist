@@ -134,15 +134,24 @@
   width: 33%;
 }
 
+/* Card footer */
 .cardFooter {
   padding: 10px 15px;
   border-top: 1px solid #ddd;
   font-size: 12px;
   color: #666;
+  display: flex;
 }
 
 .cardFooter h3 {
   margin: 10px 0 5px;
+}
+
+.removeSubgraph {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: auto;
+  order: 2;
 }
 
 .footerLink {
@@ -159,6 +168,7 @@
   margin: 0;
 }
 
+/* Curators */
 .curatorsContainer {
   font-size: 12px;
   margin-top: 10px;
@@ -170,6 +180,7 @@
   margin-bottom: 10px;
 }
 
+/* Subgraph List */
 .subgraphList {
   position: fixed;
   bottom: 0;
@@ -190,6 +201,7 @@
   margin-top: 2px;
 }
 
+/* Chart */
 .chartContainer {
   padding: 15px;
   border-top: 1px solid #ddd;
@@ -198,4 +210,44 @@
 .chartContainer h1 {
   font-size: 14px;
   margin: 0;
+}
+
+/* Search */
+.search {
+  margin: 10px 0;
+}
+
+.searchBar {
+  padding: 10px;
+  border: 1px solid #ddd;
+  width: 98%;
+  border-radius: 5px;
+  margin: 0 1%;
+}
+
+.searchResults {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 5px;
+  padding: 15px;
+  width: 70%;
+  border-radius: 5px;
+  margin: 5px 1% 0px;
+  position: absolute;
+  display: none;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.show {
+  display: block;
+}
+
+.searchResult {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.searchResult:hover {
+  background: #eee;
 }
