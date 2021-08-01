@@ -1,10 +1,13 @@
-import { Api } from '../lib/api'
+// General
+import moment from 'moment'
 
+// Lib
+import { Api } from '../lib/api'
 import { subgraphWatchQuery } from '../lib/subgraphWatchQuery'
 import { subgraphListQuery } from '../lib/subgraphListQuery'
 import { subgraphTransactionsQuery } from '../lib/subgraphTransactionsQuery'
 
-export async function fetchData(size) {
+export async function fetchData(timestamp) {
   const watchlist = window.localStorage.getItem('watchlist')?.split(',')
 
   const responses = await Promise.all(
@@ -15,7 +18,7 @@ export async function fetchData(size) {
   )
 
   const transactions = await Promise.all(
-    subgraphTransactionsQuery(watchlist, size).map(async transaction => {
+    subgraphTransactionsQuery(watchlist, timestamp).map(async transaction => {
       const response = await Api().post('', transaction)
       return response.data.data
     }),

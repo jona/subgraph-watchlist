@@ -1,4 +1,5 @@
 // General
+import moment from 'moment'
 import { useState } from 'react'
 import Head from 'next/head'
 import numeral from 'numeral'
@@ -26,12 +27,12 @@ import { useInterval } from '../hooks/useInterval'
 
 // Constants
 const INTERVAL = 10000
-const SIZE = 100
 
 export default function Home() {
   // #####################################
   // Use hooks
   // #####################################
+  const [transactionDateRange, setTransactionDateRange] = useState(5)
   const [searchResults, setSearchResults] = useState([])
   const [showSearchResults, setShowSearchResults] = useState(false)
   let [watchlist, setWatchlist] = useState([])
@@ -42,12 +43,14 @@ export default function Home() {
     transactions: [],
   })
 
+  const timestamp = moment().subtract(transactionDateRange, 'days').unix()
+
   // Set watchlist from localstorage
   watchlist =
     watchlist.length === 0 ? getWatchlistFromLocalStorage() : watchlist
 
   // Initial fetch of subgraph data
-  const { data } = useSWR(watchlist, fetchData.bind(this, SIZE))
+  const { data } = useSWR(watchlist, fetchData.bind(this, timestamp))
 
   // If data comes back, ovveride values to state
   if (data) {
@@ -63,7 +66,7 @@ export default function Home() {
   useInterval(async () => {
     if (watchlist.length === 0) return
 
-    const data = await fetchData(50)
+    const data = await fetchData(timestamp)
 
     setData({
       lastUpdated: Date.now(),
@@ -73,7 +76,7 @@ export default function Home() {
     })
   }, INTERVAL)
 
-  const [value, setValue] = useState('')
+  const [searchValue, setSearchValue] = useState('')
 
   // #####################################
   // CSS class definitions
@@ -109,7 +112,6 @@ export default function Home() {
 
   function renderSubgraphs() {
     const subgraphs = state.subgraphs
-    const transactions = state.transactions
 
     return subgraphs.map(subgraph => {
       return (
@@ -186,9 +188,9 @@ export default function Home() {
       .reverse()
 
     let signal = parseInt(subgraph.currentSignalledTokens)
-    const values = []
+    const transactionDataSet = []
 
-    values.push(signal * 10 ** -18)
+    transactionDataSet.push(signal * 10 ** -18)
 
     sorted.forEach(transaction => {
       const tokens = parseInt(transaction.tokens)
@@ -198,15 +200,15 @@ export default function Home() {
       } else {
         signal = signal + tokens
       }
-      values.push(signal * 10 ** -18)
+      transactionDataSet.push(signal * 10 ** -18)
     })
 
     const data = {
-      labels: [...Array(SIZE + 1).keys()],
+      labels: [...Array(transactionDataSet.length + 1).keys()],
       datasets: [
         {
           label: 'Signal',
-          data: values.reverse(),
+          data: transactionDataSet.reverse(),
           fill: true,
           backgroundColor: 'rgba(0, 0, 0, 0.75)',
           borderColor: 'rgba(0, 0, 0, 0.75)',
@@ -230,7 +232,7 @@ export default function Home() {
     const LineChart = () => (
       <>
         <div className={classNames('chartContainer')}>
-          <h1>Past {SIZE} transactions</h1>
+          <h1>Past {transactionDateRange} days</h1>
           <Line
             data={data}
             options={options}
@@ -463,8 +465,8 @@ export default function Home() {
         </div>
         <div className={classNames('search')}>
           <input
-            value={value}
-            onChange={e => setValue(e.target.value)}
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
             className={classNames('searchBar')}
             placeholder="Search by name"
             onKeyUp={search.bind(this)}
