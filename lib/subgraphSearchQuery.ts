@@ -1,6 +1,6 @@
 import { query } from '../lib/graphQL/subgraph/search'
 
-export function subgraphSearchQuery(name) {
+export function subgraphSearchQuery(name: string) {
   return {
     operationName: 'subgraphs',
     variables: {

@@ -1,0 +1,39 @@
+/* background: #0c0a1d; */
+.container {
+  width: 100%;
+  background: #2a245e;
+  padding: 5px 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  margin: 0 5%;
+}
+
+.title h1 {
+  font-size: 21px;
+  text-align: center;
+  color: #fff;
+  margin: 0;
+  font-weight: 500;
+}
+
+.logo {
+  margin: 7px 15px 0 0;
+}
+
+.container a {
+  color: #fff;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .title h1 {
+    font-size: 22px;
+    text-align: center;
+    margin: 0;
+  }
+}
