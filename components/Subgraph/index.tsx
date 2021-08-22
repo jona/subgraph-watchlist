@@ -6,6 +6,8 @@ import { Line } from 'react-chartjs-2'
 import 'chartjs-adapter-moment'
 import classNamesBind from 'classnames/bind'
 import Select from 'react-select'
+import moment from 'moment'
+import { useQuery } from '@apollo/client'
 
 // Styles
 import styles from './styles.module.css'
@@ -16,8 +18,9 @@ import { formatDate } from '../../lib/formatDate'
 import { styles as selectStyles } from '../../lib/select/styles'
 import distinct from '../../lib/distinct'
 
-// Fetchers
-import { fetch as fetchSubgraph } from '../../fetchers/subgraph'
+// GraphQL
+import { query as subgraphQuery } from '../../lib/graphQL/subgraph/single'
+import { query as transactionsQuery } from '../../lib/graphQL/subgraph/transactions'
 
 // Components
 import GrtSubtext from '../GrtSubtext'
@@ -35,24 +38,38 @@ export default function Subgraph(
 ) {
   const [lastUpdated, setLastUpdated] = useState(Date.now())
 
-  const { data } = useSWR(
-    `${id}+${range}`,
-    fetchSubgraph.bind(this, id, range),
-    {
-      refreshInterval: 20000,
-      onSuccess: () => {
-        setLastUpdated(Date.now())
-      },
+  const timestamp = moment().subtract(range, 'days').unix()
+
+  const { data: subgraphData } = useQuery(subgraphQuery, {
+    variables: {
+      id: id,
+      firstSignals: 5,
+      nameSignalsOrderBy: 'signalledTokens',
+      nameSignalsOrderDirection: 'desc',
     },
-  )
+    onCompleted: () => {
+      setLastUpdated(Date.now())
+    },
+    pollInterval: 20000,
+  })
 
-  if (!data) return emptySubgraph()
+  const { data: transactionData } = useQuery(transactionsQuery, {
+    variables: {
+      id: id,
+      timestamp: timestamp,
+      OrderBy: 'timestamp',
+      OrderDirection: 'desc',
+    },
+  })
 
-  const subgraph = data.subgraph
-  const transactions = data.transactions
+  if (!subgraphData || !transactionData) return emptySubgraph()
+
+  const subgraph = subgraphData.subgraph
+  const transactions = transactionData.nameSignalTransactions
 
   const renderTransactionChart = () => {
     const sorted = transactions
+      .slice()
       .sort((a: any, b: any) => (a.timestamp > b.timestamp ? 1 : -1))
       .reverse()
 

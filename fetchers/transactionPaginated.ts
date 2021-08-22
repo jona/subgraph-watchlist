@@ -15,7 +15,7 @@ export async function fetch(
 
   transactionsResponse = await Api().post(
     '',
-    transactionsQuery([], timestamp, 1000, skip),
+    transactionsQuery(timestamp, 1000, skip),
   )
 
   const transactions = transactionsResponse.data.data.nameSignalTransactions

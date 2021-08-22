@@ -17,7 +17,6 @@ import Transactions from '../components/Transactions'
 import GrtSubtext from '../components/GrtSubtext'
 import Header from '../components/Header'
 import Head from '../components/Head'
-import Navigation from '../components/Navigation'
 
 export default function Home(this: any) {
   // #####################################

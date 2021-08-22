@@ -1,36 +1,20 @@
-import { query as allQuery } from '../lib/graphQL/transaction/all'
-import { query as bySubgraphQuery } from '../lib/graphQL/transaction/bySubgraph'
+export const allQuery =
+  'query transactions($first: Int, $skip: Int, $timestamp: Int, $OrderBy: NameSignalTransaction_orderBy, $OrderDirection: OrderDirection){\n  nameSignalTransactions(first: $first, skip: $skip, where: {tokens_gt: 9000000000000000000, timestamp_gt: $timestamp}, orderBy: $OrderBy, orderDirection: $OrderDirection) {\nid\ntimestamp\ntype\nsigner{\nid\n}\nnameSignal\nversionSignal\ntokens\nsubgraph{\nid\ndisplayName}\n}\n}\n'
 
 export function transactionsQuery(
-  ids: string[],
   timestamp: number,
   first: number = 100,
   skip: number = 0,
 ) {
-  if (ids.length === 0) {
-    return {
-      operationName: 'transactions',
-      variables: {
-        first: first,
-        skip: skip,
-        timestamp: timestamp,
-        OrderBy: 'timestamp',
-        OrderDirection: 'desc',
-      },
-      query: allQuery,
-    }
-  } else {
-    return {
-      operationName: 'transactions',
-      variables: {
-        first: first,
-        skip: skip,
-        ids: ids,
-        timestamp: timestamp,
-        OrderBy: 'timestamp',
-        OrderDirection: 'desc',
-      },
-      query: bySubgraphQuery,
-    }
+  return {
+    operationName: 'transactions',
+    variables: {
+      first: first,
+      skip: skip,
+      timestamp: timestamp,
+      OrderBy: 'timestamp',
+      OrderDirection: 'desc',
+    },
+    query: allQuery,
   }
 }

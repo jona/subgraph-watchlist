@@ -1,2 +1,224 @@
-export const query =
-  'query subgraph($id: ID!, $firstSignals: Int, $nameSignalsOrderBy: NameSignal_orderBy, $nameSignalsOrderDirection: OrderDirection) {\n  subgraph(id: $id) {\n    id\n    displayName\n    nameSignalCount\n    description\n    image\n    createdAt\n    updatedAt\n    codeRepository\n    website\n    signalledTokens\n    unsignalledTokens\n    currentSignalledTokens\n    nameSignalAmount\n    owner {\n      id\n      defaultName {\n        id\n        name\n        __typename\n      }\n      image\n      __typename\n    }\n    nameSignals(first: $firstSignals, orderBy: $nameSignalsOrderBy, orderDirection: $nameSignalsOrderDirection) {\n      id\n      averageCostBasisPerSignal\n      lastNameSignalChange\n      averageCostBasis\n      signalledTokens\n      unsignalledTokens\n      nameSignal\n      signal\n      curator {\n        id\n        createdAt\n        account {\n          id\n          image\n          defaultName {\n            id\n            name\n            __typename\n          }\n          __typename\n        }\n        totalNameSignalledTokens\n        totalUnsignalledTokens\n        nameSignals {\n          id\n          nameSignal\n          subgraph {\n            id\n            image\n            nameSignalAmount\n            displayName\n            currentVersion {\n              id\n              __typename\n            }\n            versions {\n              id\n              __typename\n            }\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      subgraph {\n        id\n        nameSignalAmount\n        displayName\n        currentVersion {\n          id\n          __typename\n        }\n        versions {\n          id\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    currentVersion {\n      id\n      createdAt\n      label\n      subgraphDeployment {\n        id\n        queryFeeRebates\n        queryFeesAmount\n        indexingRewardAmount\n        schema\n        signalledTokens\n        signalAmount\n        pricePerShare\n        reserveRatio\n        curatorFeeRewards\n        network {\n          id\n          __typename\n        }\n        curatorSignals {\n          id\n          signal\n          signalledTokens\n          curator {\n            id\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    versions {\n      id\n      createdAt\n      label\n      subgraphDeployment {\n        id\n        curatorFeeRewards\n        schema\n        signalledTokens\n        signalAmount\n        pricePerShare\n        reserveRatio\n        network {\n          id\n          __typename\n        }\n        curatorSignals {\n          id\n          signal\n          signalledTokens\n          averageCostBasis\n          curator {\n            id\n            createdAt\n            account {\n              id\n              image\n              defaultName {\n                id\n                name\n                __typename\n              }\n              __typename\n            }\n            nameSignals {\n              id\n              nameSignal\n              subgraph {\n                id\n                image\n                nameSignalAmount\n                displayName\n                currentVersion {\n                  id\n                  __typename\n                }\n                versions {\n                  id\n                  __typename\n                }\n                __typename\n              }\n              __typename\n            }\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    pastVersions {\n      id\n      createdAt\n      label\n      subgraphDeployment {\n        id\n        schema\n        curatorFeeRewards\n        signalledTokens\n        signalAmount\n        pricePerShare\n        reserveRatio\n        network {\n          id\n          __typename\n        }\n        curatorSignals {\n          id\n          signal\n          signalledTokens\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n'
+import { gql } from '@apollo/client'
+
+export const query = gql`
+  query subgraph(
+    $id: ID!
+    $firstSignals: Int
+    $nameSignalsOrderBy: NameSignal_orderBy
+    $nameSignalsOrderDirection: OrderDirection
+  ) {
+    subgraph(id: $id) {
+      id
+      displayName
+      nameSignalCount
+      description
+      image
+      createdAt
+      updatedAt
+      codeRepository
+      website
+      signalledTokens
+      unsignalledTokens
+      currentSignalledTokens
+      nameSignalAmount
+      owner {
+        id
+        defaultName {
+          id
+          name
+          __typename
+        }
+        image
+        __typename
+      }
+      nameSignals(
+        first: $firstSignals
+        orderBy: $nameSignalsOrderBy
+        orderDirection: $nameSignalsOrderDirection
+      ) {
+        id
+        averageCostBasisPerSignal
+        lastNameSignalChange
+        averageCostBasis
+        signalledTokens
+        unsignalledTokens
+        nameSignal
+        signal
+        curator {
+          id
+          createdAt
+          account {
+            id
+            image
+            defaultName {
+              id
+              name
+              __typename
+            }
+            __typename
+          }
+          totalNameSignalledTokens
+          totalUnsignalledTokens
+          nameSignals {
+            id
+            nameSignal
+            subgraph {
+              id
+              image
+              nameSignalAmount
+              displayName
+              currentVersion {
+                id
+                __typename
+              }
+              versions {
+                id
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        subgraph {
+          id
+          nameSignalAmount
+          displayName
+          currentVersion {
+            id
+            __typename
+          }
+          versions {
+            id
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      currentVersion {
+        id
+        createdAt
+        label
+        subgraphDeployment {
+          id
+          queryFeeRebates
+          queryFeesAmount
+          indexingRewardAmount
+          schema
+          signalledTokens
+          signalAmount
+          pricePerShare
+          reserveRatio
+          curatorFeeRewards
+          network {
+            id
+            __typename
+          }
+          curatorSignals {
+            id
+            signal
+            signalledTokens
+            curator {
+              id
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      versions {
+        id
+        createdAt
+        label
+        subgraphDeployment {
+          id
+          curatorFeeRewards
+          schema
+          signalledTokens
+          signalAmount
+          pricePerShare
+          reserveRatio
+          network {
+            id
+            __typename
+          }
+          curatorSignals {
+            id
+            signal
+            signalledTokens
+            averageCostBasis
+            curator {
+              id
+              createdAt
+              account {
+                id
+                image
+                defaultName {
+                  id
+                  name
+                  __typename
+                }
+                __typename
+              }
+              nameSignals {
+                id
+                nameSignal
+                subgraph {
+                  id
+                  image
+                  nameSignalAmount
+                  displayName
+                  currentVersion {
+                    id
+                    __typename
+                  }
+                  versions {
+                    id
+                    __typename
+                  }
+                  __typename
+                }
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      pastVersions {
+        id
+        createdAt
+        label
+        subgraphDeployment {
+          id
+          schema
+          curatorFeeRewards
+          signalledTokens
+          signalAmount
+          pricePerShare
+          reserveRatio
+          network {
+            id
+            __typename
+          }
+          curatorSignals {
+            id
+            signal
+            signalledTokens
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+`

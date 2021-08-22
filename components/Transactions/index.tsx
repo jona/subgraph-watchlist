@@ -3,6 +3,7 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import classNamesBind from 'classnames/bind'
 import Select from 'react-select'
+import moment from 'moment'
 
 // Lib
 import { formatDate } from '../../lib/formatDate'
@@ -11,13 +12,15 @@ import { formatDate } from '../../lib/formatDate'
 import styles from './styles.module.css'
 const classNames = classNamesBind.bind(styles)
 
-// Fetchers
-import { fetch as fetchTransactions } from '../../fetchers/transactions'
+// GraphQL
+import { query as allQuery } from '../../lib/graphQL/transaction/all'
+import { query as bySubgraphQuery } from '../../lib/graphQL/transaction/bySubgraph'
 
 // Components
 import GrtSubtext from '../GrtSubtext'
 
 import { styles as selectStyles } from '../../lib/select/styles'
+import { useQuery } from '@apollo/client'
 
 export interface OwnProps {
   ids: string[]
@@ -29,40 +32,61 @@ export default function Transactions(this: any, { ids }: OwnProps) {
   const [lastUpdated, setLastUpdated] = useState(Date.now())
   const [watchlistIds, setWatchlistIds] = useState(getDefaultWatchlistIds())
 
-  const { data } = useSWR(
-    `${watchlistIds}+${range}+transactions`,
-    fetchTransactions.bind(this, watchlistIds, range, 100, 0),
-    {
-      refreshInterval: 20000,
-      onSuccess: () => {
-        setLastUpdated(Date.now())
-      },
+  const first = 100
+  const skip = 0
+  const timestamp = moment().subtract(range, 'days').unix()
+
+  let variables = null
+  let query = null
+
+  if (watchlistIds.length === 0) {
+    variables = {
+      first: first,
+      skip: skip,
+      timestamp: timestamp,
+      OrderBy: 'timestamp',
+      OrderDirection: 'desc',
+    }
+    query = allQuery
+  } else {
+    variables = {
+      first: first,
+      skip: skip,
+      id: watchlistIds,
+      timestamp: timestamp,
+      OrderBy: 'timestamp',
+      OrderDirection: 'desc',
+    }
+    query = bySubgraphQuery
+  }
+
+  const { data } = useQuery(query, {
+    variables: variables,
+    onCompleted: () => {
+      setLastUpdated(Date.now())
     },
-  )
+    pollInterval: 20000,
+  })
+
+  if (!data || data.length == 0) {
+    return (
+      <div className={classNames('emptyTransactions')}>No transactions yet</div>
+    )
+  }
+
+  const transactions = data.nameSignalTransactions
 
   // #####################################
   // Render functions
   // #####################################
   function renderlastUpdated() {
-    if (!data || data.length == 0) {
-      return null
-    }
-
     return (
       <div className={classNames('lastUpdated')}>{formatDate(lastUpdated)}</div>
     )
   }
 
   function renderTransactions() {
-    if (!data || data.length == 0) {
-      return (
-        <div className={classNames('emptyTransactions')}>
-          No transactions yet
-        </div>
-      )
-    }
-
-    return data.map((transaction: any) => {
+    return transactions.map((transaction: any) => {
       return (
         <>
           <div key={transaction.id} className={classNames('transaction')}>
