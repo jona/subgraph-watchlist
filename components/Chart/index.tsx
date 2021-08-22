@@ -1,6 +1,5 @@
 // General
 import { useState } from 'react'
-import numeral from 'numeral'
 import useSWR from 'swr'
 import { Bar } from 'react-chartjs-2'
 import 'chartjs-adapter-moment'
